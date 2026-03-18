@@ -40,6 +40,16 @@ ls -1 /usr/share/nmap/scripts/smb*
 /usr/share/nmap/scripts/smb-enum-shares.nse
 /usr/share/nmap/scripts/smb-enum-users.nse
 /usr/share/nmap/scripts/smb-os-discovery.nse
+
+# Want to run them all together?
+# run all SMB scripts at once with a wildcard:
+nmap -p 445 --script "smb*" <TARGET IP>
+
+# Or if you want to be more targeted and just run the vuln/enum ones and skip brute force:
+nmap -p 445 --script "smb-enum*,smb2*,smb-vuln*" <TARGET IP>
+
+# Or run all of them including smb and smb2:
+nmap -p 139,445 -sV --script "smb*" <TAGET IP>
 ```
 
 ## Run an SMB Script
