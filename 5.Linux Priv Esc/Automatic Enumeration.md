@@ -1,0 +1,19 @@
+# Linux Automatic Enumeration
+
+```bash
+# Download Script
+https://pentestmonkey.net/tools/unix-privesc-check/unix-privesc-check-1.4.tar.gz
+
+# Transfer script over
+
+"could not access lab"
+
+# Run Script
+./unix-privesc-check standard > output.txt
+
+# Other notable tools
+https://github.com/rebootuser/LinEnum
+https://github.com/peass-ng/PEASS-ng/tree/master/linPEAS
+```
+
+# Inspecting User Trails
