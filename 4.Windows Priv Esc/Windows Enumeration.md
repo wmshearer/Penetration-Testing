@@ -55,7 +55,7 @@ Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyCont
 Get-ChildItem -Path C:\xampp -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue
 
 #Password file in Users Directory
-Get-ChildItem -Path C:\Users -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue
+Get-ChildItem -Path C:\Users -Include *.log,*.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue
 
 type C:\xampp\mysql\bin\my.ini
 
