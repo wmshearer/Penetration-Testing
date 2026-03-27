@@ -43,6 +43,9 @@ start
 # Add ip route
 sudo ip route add 172.16.231.0/24 dev ligolo
 
+# Delete a route
+sudo ip route del 172.16.231.0/24 dev ligolo
+
 # Confirm success with ping
 ```
 
