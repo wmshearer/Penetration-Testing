@@ -126,7 +126,7 @@ Date:   Fri Nov 18 17:21:11 2022 +0200
 
 ```bash
 # Pick a commit number above
-git show 621a2e79b3a4a08bba12effe6331ff4513bad91a
+git show <REDACTED TOKEN>
 
 # Results
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
