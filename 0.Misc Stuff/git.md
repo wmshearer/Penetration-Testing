@@ -19,7 +19,7 @@ PORT   STATE SERVICE VERSION
 |     Repository description: Unnamed repository; edit this file 'description' to name the...
 |     Last commit message: Security Update 
 |     Remotes:
-|_      https://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@github.com/PWK-Challenge-Lab/dev.git
+|_      https://ghp_p8knAghZu7ik2nb2gnPcz6NxZZUbN4014Na@github.com/PWK-Challenge-Lab/dev.git
 |_http-title: Home
 |_http-server-header: Apache/2.4.52 (Ubuntu)
 |_http-generator: Nicepage 4.21.12, nicepage.com
@@ -161,4 +161,3 @@ index 0000000..55b1645
 +?>
 ```
 ![alt text](image-1.png)
-
