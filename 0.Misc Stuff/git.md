@@ -61,61 +61,61 @@ Changes not staged for commit:
 git log
 
 # Results
-commit 44a055daf7a0cd777f28f444c0d29ddf3ff08c54 (HEAD -> main)
+commit <REDACTED TOKEN> (HEAD -> main)
 Author: Stuart <luke@challenge.pwk>
 Date:   Fri Nov 18 16:58:34 2022 -0500
 
     Security Update
 
-commit 621a2e79b3a4a08bba12effe6331ff4513bad91a (origin/main, origin/HEAD)
+commit <REDACTED TOKEN> (origin/main, origin/HEAD)
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 23:57:12 2022 +0200
 
     Create database.php
 
-commit c9c8e8bd0a4b373190c4258e16e07a6296d4e43c
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 23:56:19 2022 +0200
 
     Delete database.php
 
-commit eda55ed6455d29532295684e3900cda74d695067
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:27:40 2022 +0200
 
     Create robots.txt
 
-commit ce3d418cc1bb5c5388fdc00cee5ba1cb764f499b
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:27:08 2022 +0200
 
     Create search.php
 
-commit 80ad5fe45438bb1b9cc5932f56af2e9be7e96046
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:26:09 2022 +0200
 
     Setting up database.php
 
-commit 58cfadc91978ec5db50a03c571493e3038d2935d
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:22:48 2022 +0200
 
     Create index.php
 
-commit 5e212bcd0b8d5815af1c4fdfccd6a07c16e1330b
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:22:22 2022 +0200
 
     Create order.php
 
-commit 0822a51f607bb05c0e6230acd74f27e7b6130934
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:21:50 2022 +0200
 
     Create export.php
 
-commit 1c48db4a587970ee95208f3f408676505e343318
+commit <REDACTED TOKEN>
 Author: PWK-Challenge-Lab <118549472+PWK-Challenge-Lab@users.noreply.github.com>
 Date:   Fri Nov 18 17:21:11 2022 +0200
 
