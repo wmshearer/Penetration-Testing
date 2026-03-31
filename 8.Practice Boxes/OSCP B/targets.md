@@ -15,14 +15,14 @@ MS02
   IP:   10.10.125.148
   Creds: N/A
 
-Kiero
+Kiero (Pwnd)
   IP:   192.168.165.149
   Creds: N/A
 
-Berlin
+Berlin (1 Flag)
   IP:   192.168.165.150
   Creds: N/A
 
-Gust
-  IP:   192.168.165.151 (Pwnd)
+Gust (Pwnd)
+  IP:   192.168.165.151
   Creds: N/A

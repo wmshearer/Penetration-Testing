@@ -148,4 +148,5 @@ Get-LocalGroupMember administrators
 shutdown /r /t 0
 
 # Verify it worked, and log into box
+# Grab Admin Flag
 ```
