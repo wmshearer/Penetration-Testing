@@ -147,3 +147,5 @@ Get-LocalGroupMember administrators
 # Restart Box
 shutdown /r /t 0
 
+# Verify it worked, and log into box
+```

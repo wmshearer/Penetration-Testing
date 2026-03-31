@@ -27,17 +27,36 @@ onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp-onesixtyone.txt <TARGET_I
 ```
 ![alt text](image-1.png)
 
+## Find what SNMP Responds to
+
+```bash
+snmpwalk -v2c -c `<COMMUNITY_STRING>` <TARGET_IP>
+
+# Or
+
+snmpwalk -v 1 -c <COMMUNITY_STRING> <TARGET_IP>
+
+#NOTE: It may do both
+```
+![alt text](image-3.png)
+
 ## POSS. Obtain target Email (Used for social engineering)
 - SNMP port exposed with the community string "public". This command enumerates the entire MIB tree using the -c option to specify the community string, and -v to specify the SNMP version number, as well as the -t 10 option to increase the timeout period to 10 seconds:
 
 ```bash
 snmpwalk -c public -v1 -t 10 <TARGET IP>
 ```
-
+# Windows Enumeration
 ## Enumerates the Windows Users
 
 ```bash
+# Bulk Query
+snmpbulkwalk -c public -v2c 192.168.232.149 .
+
+# THIS IS WINDOWS SPECIFIC
 snmpwalk -c public -v1 -Oa <TARGET IP> 1.3.6.1.4.1.77.1.2.25
+# Broad Query
+snmpwalk -v2c -c public 192.168.165.149 | grep -i user
 ```
 ![alt text](image-2.png)
 
@@ -56,4 +75,48 @@ snmpwalk -c public -v1 -Oa <TARGET IP> 1.3.6.1.2.1.25.6.3.1.2
 ##  List all the current TCP listening ports
 ```bash
 snmpwalk -c public -v1 -Oa <TARGET IP> 1.3.6.1.2.1.6.13.1.3
+```
+# Linux Enumeration
+## Enumerate Linux Users
+```bash
+# Bulk Query
+snmpbulkwalk -c public -v2c 192.168.232.149 .
+
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.4.1.2021.9
+# or check for user accounts via extended MIB
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.4.1.2021
+# Broad Query
+snmpwalk -v2c -c public 192.168.165.149 | grep -i user
+```
+## Enumerate Strings ran
+```bash
+snmpbulkwalk -c public -v2c 192.168.165.149 . | NET-SNMP-EXTEND-MIB
+# Results
+NET-SNMP-EXTEND-MIB::nsExtendCommand."RESET" = STRING: ./home/john/RESET_PASSWD
+```
+## Enumerate all currently-running processes
+```bash
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.2.1.25.4.2.1.2
+```
+
+## Installed Software
+```bash
+# Linux doesn't natively expose installed packages via SNMP
+# Use this to check running services/software instead
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.2.1.25.6.3.1.2
+```
+
+## List all current TCP listening ports
+```bash
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.2.1.6.13.1.3
+```
+
+## Linux-specific: disk/storage info
+```bash
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.4.1.2021.9
+```
+
+## Linux-specific: system load/CPU
+```bash
+snmpwalk -c public -v2c <TARGET IP> 1.3.6.1.4.1.2021.10
 ```
