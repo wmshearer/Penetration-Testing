@@ -83,8 +83,56 @@ The command completed successfully.
 ```bash
 enum4linux -a 192.168.130.111
 
+# -U to get userlist and -O to get OS information
+enum4linux -U -o <IP>
+
 # Enumerating multiple hosts via a file with host IPs. (This has null username/password in the command)
 
 for ip in $(cat smb-hosts.txt); do enum4linux -a -u "" -p "" $ip > enum4linux-$ip.txt; done
+
+```
+
+## CrackmapExec
+```bash
+crackmapexec smb <IP/Range>
+
+crackmapexec smb <IP> -u <username> -p <password>
+
+crackmapexec smb <IP> -u <username> -p <password> --shares # Lists all available shares
+
+crackmapexec smb <IP> -u <username> -p <password>--users # Lists users
+
+crackmapexec smb <IP> -u <username> -p <password> --all # All information
+# Use -p for specific port, -d for specific domain
+# Use -windows-auth for domain users if needed
+# Use --local-auth for local accounts
+# Use --continue-on-success to "spray"
+```
+
+## NetExec (better crackmapexec)
+```bash
+nxc smb <ip> -u <username> -p <password>
+# Can also use for WinRM, FTP, MSSQL, SSH
+# Use --local-auth for local accounts
+# Use --continue-on-success to "spray"
+```
+
+## SMBClient
+```bash
+smbclient -L //<IP>
+
+smbclient //server/share (-U <username/domain>)
+```
+## SMBMap
+```bash
+smbmap -H <IP> -u <username> -p <password> (-d <domain> -r <share_name>)
+```
+
+## If have read/write access on ADMIN$, can PsExec in
+```bash
+impacket-psexec '<username>:<password>@<IP>'
+
+smb> put <file> # Upload
+smb> get <file> # Download
 
 ```
