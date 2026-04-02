@@ -90,6 +90,8 @@ snmpwalk -v2c -c public 192.168.165.149 | grep -i user
 ```
 ## Enumerate Strings ran
 ```bash
+snmpwalk -v2c -c public 192.168.165.156 NET-SNMP-EXTEND-MIB::nsExtendObjects
+# Or
 snmpbulkwalk -c public -v2c 192.168.165.149 . | NET-SNMP-EXTEND-MIB
 # Results
 NET-SNMP-EXTEND-MIB::nsExtendCommand."RESET" = STRING: ./home/john/RESET_PASSWD
