@@ -15,6 +15,9 @@ sudo ./proxy -selfcert -laddr 0.0.0.0:11601
 # Windows Based Agent
 cd ~/tools/ligolo/ligolo-ng_agent_0.8.1_windows_amd64
 
+# Linux Based Agent
+cd ~/tools/ligolo/ligolo-ng_agent_0.8.1_linux_amd64/
+
 # Connect to Target
 evil-winrm -i 192.168.130.206 -u r.andrews -p BusyOfficeWorker890
 
