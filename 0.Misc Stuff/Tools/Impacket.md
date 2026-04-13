@@ -261,8 +261,18 @@ python3 rpcdump.py zeus.corp/o.foller:EarlyMorningFootball777@192.168.158.159
 
 ### smbclient.py — Browse SMB shares interactively
 ```
+cd ~/tools/
+
+# List shares with no password - backslash syntax (alternative to forward slash version)
+python3 smbclient.py -N -L \\\\192.168.91.111\\
+#Found a folder? IE: MyDocuments
+python3 smbclient.py -N -L \\\\192.168.91.111\\MyDocuments
+
 python3 smbclient.py zeus.corp/o.foller:EarlyMorningFootball777@192.168.158.159
 # Inside the shell: shares, use C$, ls, get filename, put filename
+
+#No Password Login
+python3 smbclient.py -L //192.168.123.111/ --no-pass
 ```
 
 ---
