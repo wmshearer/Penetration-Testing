@@ -12,8 +12,7 @@ script -qc /bin/bash /dev/null
 ```bash
 # On Kali
 CTRL+z
-stty raw -echo
-fg
+stty raw -echo; fg
 stty -a
  
 # On Target
